@@ -71,7 +71,7 @@
 </ol>
 <p>采用该方案所有访问国外IP的流量都要经过Shadowsocks中转，而且ChinaDNS对国内DNS服务器的访问容易受到DNS污染，例如，当被墙的国外网站被污染的国内DNS服务器解析为国内IP时，该方案无法将被墙的网站导向Shadowsocks代理。</p>
 <ol>
-<li>Shadowsocks + Redsock
+<li>Shadowsocks + Redsock<br />
   该方案依靠 <a href="https://github.com/semigodking/redsocks">Redsocks2</a> 的自动判断机制识别被墙的IP，Redsocks2的原理为：Redsocks2在其监听端口接收通过iptables定向来的TCP连接，首先尝试不通过Shadowsocks代理而是直接将这些连接进行中转。当直接中转发生错误或者连接超时时，Redsocks2才会再次将这些遇到问题的连接通过Shadowsocks代理中转。</li>
 </ol>
 <p>该方案存在的问题是访问被墙的网站需要等待Redsocks2尝试超时，存在较长的延时，使用体验较差。</p>
