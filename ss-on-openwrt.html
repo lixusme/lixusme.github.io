@@ -135,7 +135,7 @@ GfwList是以正则表达式方式对域名进行描述，为了将GfwList转换
   opkg install pdnsd.ipk
   /etc/init.d/pdnsd enable</code>
   编辑文件 <code>/etc/pdnsd.conf</code>，文件内容如下：</p>
-<div class="highlight"><pre><span></span>  ```
+<div class="highlight"><pre><span></span>  ```ini
   global {
     perm_cache=1024;
     cache_dir=&quot;/var/pdnsd&quot;;
@@ -167,7 +167,7 @@ GfwList是以正则表达式方式对域名进行描述，为了将GfwList转换
 
 </li>
 <li>
-<p>配置iptables和ipset </p>
+<p>配置iptables和ipset  </p>
 </li>
 </ol>
 <p>至此基本安装工作已经完成，Shadowsocks代理已经监听在TCP 1080端口，只需要配置iptables将对ipset gwlist中IP的访问导向1080端口即可。为了简单起见，我们可以直接把相关配置包括上述的opendns定向放入shadowsocks的启动文件 <code>/etc/init.d/shadowsocks</code>，修改后该文件的内容如下：</p>
