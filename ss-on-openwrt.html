@@ -86,12 +86,10 @@
 <li>安装Shadowsocks  </li>
 <li>
 <p>下载shadowsocks软件包：  </p>
-<p><code>bash
- cd /tmp  
+<p><code>cd /tmp  
  wget -O shadowsocks.ipk https://sourceforge.net/projects/openwrt-dist/files/shadowsocks-libev/2.4.7-b4060bc/ar71xx/shadowsocks-libev-spec_2.4.7-1_ar71xx.ipk/download</code><br />
   * 安装： </p>
-<p><code>bash
-  opkg update
+<p><code>opkg update
   opkg install iptables-mod-nat-extra --force-depends
   opkg install ipset libopenssl
   opkg install shadowsocks.ipk --force-overwrite
@@ -107,7 +105,7 @@
 " _X.X.X.X_="&quot;X.X.X.X&quot;,
 " _local_port_:="&quot;local_port&quot;:" _method_:="&quot;method&quot;:" _password_="&quot;password&quot;,
 " _password_:="&quot;password&quot;:" _rc4-md5_="&quot;rc4-md5&quot;
-" _server_:="&quot;server&quot;:" _server_port_:="&quot;server_port&quot;:">```json  <br /></p>
+" _server_:="&quot;server&quot;:" _server_port_:="&quot;server_port&quot;:">```</p>
 <p>```</p>
 </li>
 <li>
@@ -129,13 +127,12 @@ GfwList是以正则表达式方式对域名进行描述，为了将GfwList转换
 </li>
 <li>
 <p>安装pdnsd</p>
-<p><code>bash
-  cd /tmp
+<p><code>cd /tmp
   wget -O pdnsd.ipk https://downloads.openwrt.org/barrier_breaker/14.07/ar71xx/generic/packages/oldpackages/pdnsd_1.2.9a-par-a8e46ccba7b0fa2230d6c42ab6dcd92926f6c21d_ar71xx.ipk
   opkg install pdnsd.ipk
   /etc/init.d/pdnsd enable</code>
   编辑文件 <code>/etc/pdnsd.conf</code>，文件内容如下：</p>
-<div class="highlight"><pre><span></span>  ```ini
+<div class="highlight"><pre><span></span>  ```
   global {
     perm_cache=1024;
     cache_dir=&quot;/var/pdnsd&quot;;
@@ -171,7 +168,7 @@ GfwList是以正则表达式方式对域名进行描述，为了将GfwList转换
 </li>
 </ol>
 <p>至此基本安装工作已经完成，Shadowsocks代理已经监听在TCP 1080端口，只需要配置iptables将对ipset gwlist中IP的访问导向1080端口即可。为了简单起见，我们可以直接把相关配置包括上述的opendns定向放入shadowsocks的启动文件 <code>/etc/init.d/shadowsocks</code>，修改后该文件的内容如下：</p>
-<div class="highlight"><pre><span></span><span class="x">```bash</span>
+<div class="highlight"><pre><span></span><span class="x">```</span>
 <span class="err">#</span><span class="x">!/bin/sh /etc/rc.common</span>
 
 <span class="x">START=95</span>
