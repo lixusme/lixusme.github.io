@@ -62,7 +62,7 @@
               </address>
             </footer><!-- /.post-info -->
             <div class="entry-content">
-              <h1>翻墙方案原理</h1>
+              <h2>翻墙方案原理</h2>
 <p>在OpenWrt上安装Shadowsocks实现自动翻墙一般有三种方案（参见 <a href="https://cokebar.info/archives/664">飞羽博客</a>）。不管采用哪种方式，其基本原理都是一样的：使用Shadowsocks建立透明代理，再按一定的规则将需要翻墙的流量导入到该透明代理。这三种方案的区别就在于判别翻墙流量的规则。</p>
 <p>以下分别对这三种方案进行简单介绍，并对其中的最优方案的实现做详细介绍。</p>
 <ol>
@@ -81,7 +81,7 @@
 </ol>
 <p>从工作原理来看，此方案是翻墙的最优方案，唯一的问题是GfwList中的域名可能未涵盖全部被墙的域名，解决方案是定期对GfwList进行更新，或者手工将遗漏的域名添加到list中去。</p>
 <p>本文下一节将具体介绍如何在OpenWrt实现这一翻墙方案。以下安装是在一台运行14.07版本的Atheros 9341芯片的AP上进行的，对于其它型号的AP或者不同版本的OpenWrt可参照进行。</p>
-<h1>Shadowsocks+GfwList安装</h1>
+<h2>Shadowsocks+GfwList安装</h2>
 <ol>
 <li>安装Shadowsocks  </li>
 <li>
@@ -101,17 +101,13 @@
 <li>
 <p>配置：<br />
   创建文件 <code>/etc/shadowsocks.json</code>，该文件包含Shadowsocks服务器的信息，文件内容为：  </p>
-<p>```json</p>
-<div class="highlight"><pre><span></span>{
-      &quot;server&quot;: &quot;X.X.X.X&quot;,
-      &quot;server_port&quot;: &quot;9898&quot;,
-      &quot;password&quot;: &quot;password&quot;,
-      &quot;local_port&quot;: &quot;1080&quot;,
-      &quot;method&quot;: &quot;rc4-md5&quot;
-}
-</pre></div>
-
-
+<p _="
+" _1080_="&quot;1080&quot;,
+" _9898_="&quot;9898&quot;,
+" _X.X.X.X_="&quot;X.X.X.X&quot;,
+" _local_port_:="&quot;local_port&quot;:" _method_:="&quot;method&quot;:" _password_="&quot;password&quot;,
+" _password_:="&quot;password&quot;:" _rc4-md5_="&quot;rc4-md5&quot;
+" _server_:="&quot;server&quot;:" _server_port_:="&quot;server_port&quot;:">```json  <br /></p>
 <p>```</p>
 </li>
 <li>
