@@ -66,19 +66,19 @@
 <p>在OpenWrt上安装Shadowsocks实现自动翻墙一般有三种方案（参见 <a href="https://cokebar.info/archives/664">飞羽博客</a>）。不管采用哪种方式，其基本原理都是一样的：使用Shadowsocks建立透明代理，再按一定的规则将需要翻墙的流量导入到该透明代理。这三种方案的区别就在于判别翻墙流量的规则。</p>
 <p>以下分别对这三种方案进行简单介绍，并对其中的最优方案的实现做详细介绍。</p>
 <ol>
-<li>Shadowsocks + ChinaDNS<br />
-  该方案采用 <a href="https://github.com/shadowsocks/ChinaDNS">ChinaDNS</a> 的解析结果对需要翻墙的流量进行识别。ChinaDNS的原理为：配置至少一个国内DNS服务器和一个国外DNS服务器，ChinaDNS收到由OpenWrt Dnsmasq转发来的用户DNS请求后，同时向这些DNS服务器发送请求。如果从国内DNS服务器返回的结果为国外IP，则选用国外DNS服务器的解析结果，否则选择国内DNS的解析结果返回给用户。为了防止DNS污染，对国外DNS服务器的访问需要通过Shadowsocks或者VPN进行中转。</li>
+<li>Shadowsocks + ChinaDNS  </li>
 </ol>
+<p>该方案采用 <a href="https://github.com/shadowsocks/ChinaDNS">ChinaDNS</a> 的解析结果对需要翻墙的流量进行识别。ChinaDNS的原理为：配置至少一个国内DNS服务器和一个国外DNS服务器，ChinaDNS收到由OpenWrt Dnsmasq转发来的用户DNS请求后，同时向这些DNS服务器发送请求。如果从国内DNS服务器返回的结果为国外IP，则选用国外DNS服务器的解析结果，否则选择国内DNS的解析结果返回给用户。为了防止DNS污染，对国外DNS服务器的访问需要通过Shadowsocks或者VPN进行中转。</p>
 <p>采用该方案所有访问国外IP的流量都要经过Shadowsocks中转，而且ChinaDNS对国内DNS服务器的访问容易受到DNS污染，例如，当被墙的国外网站被污染的国内DNS服务器解析为国内IP时，该方案无法将被墙的网站导向Shadowsocks代理。</p>
 <ol>
-<li>Shadowsocks + Redsock<br />
-  该方案依靠 <a href="https://github.com/semigodking/redsocks">Redsocks2</a> 的自动判断机制识别被墙的IP，Redsocks2的原理为：Redsocks2在其监听端口接收通过iptables定向来的TCP连接，首先尝试不通过Shadowsocks代理而是直接将这些连接进行中转。当直接中转发生错误或者连接超时时，Redsocks2才会再次将这些遇到问题的连接通过Shadowsocks代理中转。</li>
+<li>Shadowsocks + Redsock</li>
 </ol>
+<p>该方案依靠 <a href="https://github.com/semigodking/redsocks">Redsocks2</a> 的自动判断机制识别被墙的IP，Redsocks2的原理为：Redsocks2在其监听端口接收通过iptables定向来的TCP连接，首先尝试不通过Shadowsocks代理而是直接将这些连接进行中转。当直接中转发生错误或者连接超时时，Redsocks2才会再次将这些遇到问题的连接通过Shadowsocks代理中转。</p>
 <p>该方案存在的问题是访问被墙的网站需要等待Redsocks2尝试超时，存在较长的延时，使用体验较差。</p>
 <ol>
-<li>Shadowsocks + GfwList<br />
-   该方案根据GfwList中的域名判断是否走代理。位于GfwList中的域名走Shadowsocks代理，不在GfwList中的域名不走代理。由于Linux的iptables只能根据IP地址做定向，我们需要通过dnsmasq-full将GfwList中的域名解析为IP加到一个ipset中，iptables根据这个ipset来判定是否需要走Shadowsocks代理。需要注意的是，对于GfwList的域名解析，不能使用国内的DNS服务器进行解析，因为国内DNS对GfwList中的域名会进行污染解析，具体原理见维基百科中的 <a href="https://zh.wikipedia.org/zh-cn/%E5%9F%9F%E5%90%8D%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%BC%93%E5%AD%98%E6%B1%A1%E6%9F%93#cite_note-3">域名服务器缓存污染</a> 词条。</li>
+<li>Shadowsocks + GfwList</li>
 </ol>
+<p>该方案根据GfwList中的域名判断是否走代理。位于GfwList中的域名走Shadowsocks代理，不在GfwList中的域名不走代理。由于Linux的iptables只能根据IP地址做定向，我们需要通过dnsmasq-full将GfwList中的域名解析为IP加到一个ipset中，iptables根据这个ipset来判定是否需要走Shadowsocks代理。需要注意的是，对于GfwList的域名解析，不能使用国内的DNS服务器进行解析，因为国内DNS对GfwList中的域名会进行污染解析，具体原理见维基百科中的 <a href="https://zh.wikipedia.org/zh-cn/%E5%9F%9F%E5%90%8D%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%BC%93%E5%AD%98%E6%B1%A1%E6%9F%93#cite_note-3">域名服务器缓存污染</a> 词条。</p>
 <p>从工作原理来看，此方案是翻墙的最优方案，唯一的问题是GfwList中的域名可能未涵盖全部被墙的域名，解决方案是定期对GfwList进行更新，或者手工将遗漏的域名添加到list中去。</p>
 <p>本文下一节将具体介绍如何在OpenWrt实现这一翻墙方案。以下安装是在一台运行14.07版本的Atheros 9341芯片的AP上进行的，对于其它型号的AP或者不同版本的OpenWrt可参照进行。</p>
 <h2>Shadowsocks+GfwList安装</h2>

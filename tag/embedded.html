@@ -62,18 +62,19 @@
 <p>在OpenWrt上安装Shadowsocks实现自动翻墙一般有三种方案（参见 <a href="https://cokebar.info/archives/664">飞羽博客</a>）。不管采用哪种方式，其基本原理都是一样的：使用Shadowsocks建立透明代理，再按一定的规则将需要翻墙的流量导入到该透明代理。这三种方案的区别就在于判别翻墙流量的规则。</p>
 <p>以下分别对这三种方案进行简单介绍，并对其中的最优方案的实现做详细介绍。</p>
 <ol>
-<li>Shadowsocks + ChinaDNS<br />
-  该方案采用 <a href="https://github.com/shadowsocks/ChinaDNS">ChinaDNS</a> 的解析结果对需要翻墙的流量进行识别。ChinaDNS的原理为：配置至少一个国内DNS服务器和一个国外DNS服务器，ChinaDNS收到由OpenWrt Dnsmasq转发来的用户DNS请求后，同时向这些DNS服务器发送请求。如果从国内DNS服务器返回的结果为国外IP，则选用国外DNS服务器的解析结果，否则选择国内DNS的解析结果返回给用户。为了防止DNS污染，对国外DNS服务器的访问需要通过Shadowsocks或者VPN进行中转。</li>
+<li>Shadowsocks + ChinaDNS  </li>
 </ol>
+<p>该方案采用 <a href="https://github.com/shadowsocks/ChinaDNS">ChinaDNS</a> 的解析结果对需要翻墙的流量进行识别。ChinaDNS的原理为：配置至少一个国内DNS服务器和一个国外DNS服务器，ChinaDNS收到由OpenWrt Dnsmasq转发来的用户DNS请求后，同时向这些DNS服务器发送请求。如果从国内DNS服务器返回的结果为国外IP，则选用国外DNS服务器的解析结果，否则选择国内DNS的解析结果返回给用户。为了防止DNS污染，对国外DNS服务器的访问需要通过Shadowsocks或者VPN进行中转。</p>
 <p>采用该方案所有访问国外IP的流量都要经过Shadowsocks中转，而且ChinaDNS对国内DNS服务器的访问容易受到DNS污染，例如，当被墙的国外网站被污染的国内DNS服务器解析为国内IP时，该方案无法将被墙的网站导向Shadowsocks代理。</p>
 <ol>
-<li>Shadowsocks + Redsock<br />
-  该方案依靠 <a href="https://github.com/semigodking/redsocks">Redsocks2</a> 的自动判断机制识别被墙的IP，Redsocks2的原理为：Redsocks2在其监听端口接收通过iptables定向来的TCP连接，首先尝试不通过Shadowsocks代理而是直接将这些连接进行中转。当直接中转发生错误或者连接超时时，Redsocks2才会再次将这些遇到问题的连接通过Shadowsocks代理中转。</li>
+<li>Shadowsocks + Redsock</li>
 </ol>
+<p>该方案依靠 <a href="https://github.com/semigodking/redsocks">Redsocks2</a> 的自动判断机制识别被墙的IP，Redsocks2的原理为：Redsocks2在其监听端口接收通过iptables定向来的TCP连接，首先尝试不通过Shadowsocks代理而是直接将这些连接进行中转。当直接中转发生错误或者连接超时时，Redsocks2才会再次将这些遇到问题的连接通过Shadowsocks代理中转。</p>
 <p>该方案存在的问题是访问被墙的网站需要等待Redsocks2尝试超时，存在较长的延时，使用体验较差。</p>
 <ol>
-<li>Shadowsocks + GfwList<br />
-   该方案根据GfwList中的域名判断是否走代理。位于GfwList中的域名走Shadowsocks代理，不在GfwList中的域名不走代理。由于Linux的iptables只能根据IP地址做定向 ...</li></ol> </div><!-- /.entry-content -->
+<li>Shadowsocks + GfwList</li>
+</ol>
+<p>该方案根据GfwList中的域名判断是否走代理。位于GfwList中的域名走Shadowsocks代理，不在GfwList中的域名不走代理。由于Linux的iptables只能根据IP地址做定向 ...</p> </div><!-- /.entry-content -->
 
                                 <div class="medium primary btn"><a href="/ss-on-openwrt.html" rel="bookmark" title="Permalink to OpenWrt科学上网原理及配置">Read more <i class="icon-arrow-right"></i></a></div>
 
