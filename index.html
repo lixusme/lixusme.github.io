@@ -1,64 +1,37 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-
-        <title>Lixus</title>
         <meta charset="utf-8" />
+        <title>Lixus</title>
+        <link rel="stylesheet" href="/theme/css/main.css" />
 
-
-        <!-- Mobile viewport optimized: j.mp/bplateviewport -->
-        <meta name="viewport" content="width=device-width,initial-scale=1, maximum-scale=1">
-
-        <link rel="stylesheet" type="text/css" href="/theme/gumby.css" />
-        <link rel="stylesheet" type="text/css" href="/theme/style.css" />
-        <link rel="stylesheet" type="text/css" href="/theme/pygment.css" />
-
-        <script src="/theme/js/libs/modernizr-2.6.2.min.js"></script>
-
-
-
-
+        <!--[if IE]>
+            <script src="https://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
 </head>
 
 <body id="index" class="home">
+        <header id="banner" class="body">
+                <h1><a href="/">Lixus </a></h1>
+                <nav><ul>
+                    <li><a href="/category/misc.html">misc</a></li>
+                </ul></nav>
+        </header><!-- /#banner -->
 
+            <aside id="featured" class="body">
+                <article>
+                    <h1 class="entry-title"><a href="/ss-on-openwrt.html">OpenWrt科学上网原理及配置</a></h1>
+<footer class="post-info">
+        <abbr class="published" title="2016-07-09T00:00:00+08:00">
+                Published: 六 09 七月 2016
+        </abbr>
 
-    <div class="container">
-
-        <div class="row">
-
-          <header id="banner" class="body">
-                  <h1><a href="/">Lixus <strong></strong></a></h1>
-          </header><!-- /#banner -->
-
-            <div id="navigation" class="navbar row">
-              <a href="#" gumby-trigger="#navigation &gt; ul" class="toggle"><i class="icon-menu"></i></a>
-             
-              <ul class="columns">
-                <li><a href="/">Home</a></li>
-
-
-              </ul>
-            </div>
-
-<section id="content">
-
-
-
-   <div class="row">
-
-
-        <div class="eleven columns">
-                 <ol id="post-list">
-                        <li><article class="hentry">
-                                <header> <h2 class="entry-title"><a href="/ss-on-openwrt.html" rel="bookmark" title="Permalink to OpenWrt科学上网原理及配置">OpenWrt科学上网原理及配置</a></h2> </header>
-                                <footer class="post-info">
-                                    <abbr class="published" title="2016-07-09T00:00:00+08:00"> 六 09 七月 2016 </abbr>
-                                    <address class="vcard author">By 
-                                    <a class="url fn" href="/author/lixus.html"> lixus</a>
-                                    </address>
-                                </footer><!-- /.post-info -->
-                                <div class="entry-content"> <h2>翻墙方案原理</h2>
+        <address class="vcard author">
+                By                         <a class="url fn" href="/author/lixus.html">lixus</a>
+        </address>
+<p>In <a href="/category/misc.html">misc</a>.</p>
+<p>tags: <a href="/tag/embedded.html">embedded</a> </p>
+</footer><!-- /.post-info --><h2>翻墙方案原理</h2>
 <p>在OpenWrt上安装Shadowsocks实现自动翻墙一般有三种方案（参见 <a href="https://cokebar.info/archives/664">飞羽博客</a>）。不管采用哪种方式，其基本原理都是一样的：使用Shadowsocks建立透明代理，再按一定的规则将需要翻墙的流量导入到该透明代理。这三种方案的区别就在于判别翻墙流量的规则。</p>
 <p>以下分别对这三种方案进行简单介绍，并对其中的最优方案的实现做详细介绍。</p>
 <ol>
@@ -73,103 +46,187 @@
 <p>该方案存在的问题是访问被墙的网站需要等待Redsocks2尝试超时，存在较长的延时，使用体验较差。</p>
 <ol>
 <li>Shadowsocks + GfwList<br />
-   该方案根据GfwList中的域名判断是否走代理。位于GfwList中的域名走Shadowsocks代理，不在GfwList中的域名不走代理。由于Linux的iptables只能根据IP地址做定向 ...</li></ol> </div><!-- /.entry-content -->
+   该方案根据GfwList中的域名判断是否走代理。位于GfwList中的域名走Shadowsocks代理，不在GfwList中的域名不走代理。由于Linux的iptables只能根据IP地址做定向，我们需要通过dnsmasq-full将GfwList中的域名解析为IP加到一个ipset中，iptables根据这个ipset来判定是否需要走Shadowsocks代理。需要注意的是，对于GfwList的域名解析，不能使用国内的DNS服务器进行解析，因为国内DNS对GfwList中的域名会进行污染解析，具体原理见维基百科中的 <a href="https://zh.wikipedia.org/zh-cn/%E5%9F%9F%E5%90%8D%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%BC%93%E5%AD%98%E6%B1%A1%E6%9F%93#cite_note-3">域名服务器缓存污染</a> 词条。</li>
+</ol>
+<p>从工作原理来看，此方案是翻墙的最优方案，唯一的问题是GfwList中的域名可能未涵盖全部被墙的域名，解决方案是定期对GfwList进行更新，或者手工将遗漏的域名添加到list中去。</p>
+<p>本文下一节将具体介绍如何在OpenWrt实现这一翻墙方案。以下安装是在一台运行14.07版本的Atheros 9341芯片的AP上进行的，对于其它型号的AP或者不同版本的OpenWrt可参照进行。</p>
+<h2>Shadowsocks+GfwList安装</h2>
+<ol>
+<li>
+<p>安装Shadowsocks  </p>
+</li>
+<li>
+<p>下载shadowsocks软件包：  </p>
+<p><code>bash
+ cd /tmp  
+ wget -O shadowsocks.ipk https://sourceforge.net/projects/openwrt-dist/files/shadowsocks-libev/2.4.7-b4060bc/ar71xx/shadowsocks-libev-spec_2.4.7-1_ar71xx.ipk/download</code><br />
+  + 安装： </p>
+<p><code>bash
+  opkg update
+  opkg install iptables-mod-nat-extra --force-depends
+  opkg install ipset libopenssl
+  opkg install shadowsocks.ipk --force-overwrite
+  /etc/init.d/shadowsocks enable</code>
+  若安装过程中有错误提示，使用 <code>opkg list-installed |grep shadowsocks</code>确认下package是否已安装，若已安装可忽略安装中的错误。</p>
+</li>
+<li>
+<p>配置：<br />
+  创建文件 <code>/etc/shadowsocks.json</code>，该文件包含Shadowsocks服务器的信息，文件内容为：  </p>
+<p _="
+" _1080_="&quot;1080&quot;,
+" _9898_="&quot;9898&quot;,
+" _X.X.X.X_="&quot;X.X.X.X&quot;,
+" _local_port_:="&quot;local_port&quot;:" _method_:="&quot;method&quot;:" _password_="&quot;password&quot;,
+" _password_:="&quot;password&quot;:" _rc4-md5_="&quot;rc4-md5&quot;
+" _server_:="&quot;server&quot;:" _server_port_:="&quot;server_port&quot;:">```json</p>
+<p>```</p>
+</li>
+<li>
+<p>安装GfwList<br />
+GfwList是以正则表达式方式对域名进行描述，为了将GfwList转换为可以被dnsmasq使用的格式，需要下载一个转换工具：<a href="https://github.com/cokebar/gfwlist2dnsmasq">https://github.com/cokebar/gfwlist2dnsmasq</a></p>
+</li>
+</ol>
+<p>将该软件下载到本地后，修改文件<code>gfwlist2dnsmasq.py: mydnsport = '5300'</code>，然后执行 <code>python gfwlist2dnsmasq.py</code>，将在当前文件夹下生成文件<code>dnsmasq_list.conf</code>。在OpenWrt中创建目录<code>/etc/dnsmasq.d</code>并将<code>dnsmasq_list.conf</code>放入其中。</p>
+<ol>
+<li>
+<p>安装DNS相关软件<br />
+如原理章节所述，我们需要通过dnsmasq将GfwList中的域名解析为IP地址放入ipset中供iptables使用。为了防止DNS污染，对于GfwList中的域名，我们采用DNS代理pdnsd，通过TCP协议经由shadowsocks代理到opendns进行解析。</p>
+</li>
+<li>
+<p>安装dnsmasq-full</p>
+<p><code>bash
+  opkg remove dnsmasq &amp;&amp; opkg install dnsmasq-full</code>
+  编辑文件 <code>/etc/dnsmasq.conf</code>，在文件最后添加一行：
+  <code>conf-dir=/etc/dnsmasq.d</code></p>
+</li>
+<li>
+<p>安装pdnsd</p>
+<p><code>bash
+  cd /tmp
+  wget -O pdnsd.ipk https://downloads.openwrt.org/barrier_breaker/14.07/ar71xx/generic/packages/oldpackages/pdnsd_1.2.9a-par-a8e46ccba7b0fa2230d6c42ab6dcd92926f6c21d_ar71xx.ipk
+  opkg install pdnsd.ipk
+  /etc/init.d/pdnsd enable</code>
+  编辑文件 <code>/etc/pdnsd.conf</code>，文件内容如下：</p>
+<div class="highlight"><pre><span></span>  ```ini
+  global {
+    perm_cache=1024;
+    cache_dir=&quot;/var/pdnsd&quot;;
+    run_as=&quot;nobody&quot;;
+    server_ip = 127.0.0.1;  # Use eth0 here if you want to allow other
+                            # machines on your network to query pdnsd.
+    server_port=5300;      #监听5300端口
+    status_ctl = on;
+                       # but may make pdnsd less efficient, unfortunately.
+    query_method=tcp_only;  #强制tcp解析dos
+    min_ttl=15m;       # Retain cached entries at least 15 minutes.
+    max_ttl=1w;        # One week.
+    timeout=10;        # Global timeout option (10 seconds).
+    neg_domain_pol=on;
+    udpbufsize=1024;   # Upper limit on the size of UDP messages.
+    }
 
-                                <div class="medium primary btn"><a href="/ss-on-openwrt.html" rel="bookmark" title="Permalink to OpenWrt科学上网原理及配置">Read more <i class="icon-arrow-right"></i></a></div>
+    server {
+            label = &quot;opendns&quot;;
+            ip = 208.67.222.222, 208.67.220.220;
+            port = 5353;
+            timeout = 4;
+            uptest = none;            # Test availability using ICMP echo requests.
+    }
+  ```
+  为了让对opendns的查询走shadowsocks代理，需要将opendns的IP加入gfwlist这个ipset。可以在shadowsocks启动时加入，具体配置在下面一并给出。
+</pre></div>
 
 
+</li>
+<li>
+<p>配置iptables和ipset  </p>
+</li>
+</ol>
+<p>至此基本安装工作已经完成，Shadowsocks代理已经监听在TCP 1080端口，只需要配置iptables将对ipset gwlist中IP的访问导向1080端口即可。为了简单起见，我们可以直接把相关配置包括上述的opendns定向放入shadowsocks的启动文件 <code>/etc/init.d/shadowsocks</code>，修改后该文件的内容如下：</p>
+<div class="highlight"><pre><span></span><span class="x">```bash</span>
+<span class="err">#</span><span class="x">!/bin/sh /etc/rc.common</span>
 
-                                <div class="row tag-row">
-                                        <span>Tagged as : </span>
-                                            <a class="danger label" href="/tag/embedded.html">embedded</a>
-                                </div>
+<span class="x">START=95</span>
 
+<span class="x">SERVICE_USE_PID=1</span>
+<span class="x">SERVICE_WRITE_PID=1</span>
+<span class="x">SERVICE_DAEMONIZE=1</span>
+<span class="x">SERVICE_PID_FILE=/var/run/shadowsocks.pid</span>
+<span class="x">CONFIG=/etc/shadowsocks.json</span>
+<span class="x">DNS=8.8.8.8:53</span>
+<span class="x">TUNNEL_PORT=5353</span>
 
+<span class="x">start() </span><span class="err">{</span><span class="x"></span>
+<span class="x">    </span><span class="err">#</span><span class="x"> Client Mode</span>
+<span class="x">    </span><span class="cp">#</span><span class="nf">service_start</span><span class="x"> /usr/bin/ss-local -c </span><span class="p">$</span><span class="nv">CONFIG</span><span class="x"> -b 0.0.0.0 -f </span><span class="p">$</span><span class="nv">SERVICE_PID_FILE</span><span class="x"></span>
+<span class="x">    </span><span class="err">#</span><span class="x"> Proxy Mode</span>
+<span class="x">    service_start /usr/bin/ss-redir -c </span><span class="p">$</span><span class="nv">CONFIG</span><span class="x"> -b 0.0.0.0 -f </span><span class="p">$</span><span class="nv">SERVICE_PID_FILE</span><span class="x"></span>
+<span class="x">    </span><span class="err">#</span><span class="x"> Tunnel</span>
+<span class="x">    </span><span class="cp">#</span><span class="nf">service_start</span><span class="x"> /usr/bin/ss-tunnel -c </span><span class="p">$</span><span class="nv">CONFIG</span><span class="x"> -b 0.0.0.0 -u -l </span><span class="p">$</span><span class="nv">TUNNEL_PORT</span><span class="x"> -L </span><span class="p">$</span><span class="nv">DNS</span><span class="x"></span>
+<span class="x">    </span><span class="err">#</span><span class="x"> set up ipset</span>
+<span class="x">    ipset -N gfwlist iphash</span>
+<span class="x">    ipset add gfwlist 208.67.222.222</span>
+<span class="x">    ipset add gfwlist 208.67.220.220</span>
+<span class="x">    </span><span class="err">#</span><span class="x"> iptables: redirect gfwlst to ss</span>
+<span class="x">    iptables -t nat -A PREROUTING -p tcp -m set --match-set gfwlist dst -j REDIRECT --to-port 1080</span>
+<span class="x">    </span><span class="err">#</span><span class="x"> FOR BRIDGED AP: redirect dns query to local dnsmasq</span>
+<span class="x">    </span><span class="cp">#</span><span class="nf">iptables</span><span class="x"> -t nat -A PREROUTING -p udp --dport 53 -j DNAT --to 192.168.1.1:53</span>
+<span class="x">    </span><span class="cp">#</span><span class="nf">iptables</span><span class="x"> -t nat -A PREROUTING -p tcp --dport 53 -j DNAT --to 192.168.1.1:53    </span>
+<span class="x">}</span>
 
-                        </article></li>
-                </ol><!-- /#posts-list -->
-
-        </div><!-- /.eleven.columns -->
-        
-<div class="three columns">
-
-<h4>Pages</h4>
-
- <ul>
-  </ul>
-
-<h4>Categories</h4>
-<ul class="blank">
-		<li><a href="/category/misc.html">misc</a></li>
-</ul>
-
-
-<h4>Tags</h4>
-	<ul class="blank">
-</ul>
-
-
-<nav class="widget">
-  <h4>Social</h4>
-  <ul class="blank">
-    <li><a href="#">You can add links in your config file</a></li>
-    <li><a href="#">Another social link</a></li>
-  </ul>
-</nav>
-
-</div> </div><!-- /.row -->
-
-<p class="paginator">
-    Page 1 / 1
-</p>
-</section><!-- /#content -->
-
-       </div><!-- /.row -->
-    </div><!-- /.container -->
-
-
-       <div class="container.nopad bg">
-
-    
-        <footer id="credits" class="row">
-          <div class="seven columns left-center">
-
-                   <address id="about" class="vcard body">
-                    Proudly powered by <a href="http://getpelican.com/">Pelican</a>,
-                    which takes great advantage of <a href="http://python.org">Python</a>.
-                    <br />
-                    Based on the <a target="_blank" href="http://gumbyframework.com">Gumby Framework</a>
-                    </address>
-          </div>
+<span class="x">stop() </span><span class="err">{</span><span class="x"></span>
+<span class="x">    </span><span class="err">#</span><span class="x"> Client Mode</span>
+<span class="x">    </span><span class="cp">#</span><span class="nf">service_stop</span><span class="x"> /usr/bin/ss-local</span>
+<span class="x">    </span><span class="err">#</span><span class="x"> Proxy Mode</span>
+<span class="x">    service_stop /usr/bin/ss-redir</span>
+<span class="x">    </span><span class="err">#</span><span class="x"> Tunnel</span>
+<span class="x">    </span><span class="cp">#</span><span class="nf">service_stop</span><span class="x"> /usr/bin/ss-tunnel</span>
+<span class="x">}</span>
+<span class="x">```</span>
+</pre></div>
 
 
-          <div class="seven columns">
-            <div class="row">
-              <ul class="socbtns">
+<ol>
+<li>桥模式AP的DNS重定向配置<br />
+如果AP工作于桥模式，由于DNS查询不经过OpenWrt的本地dnsmasq，导致无法将GfwList中的域名解析到ipset实现自动翻墙。解决方案是将所有经由该AP的DNS查询重定向到本地的dnsmasq，只需将文件<code>/etc/init.d/shadowsocks</code> 中 "# FOR BRIDGED AP"下面两行的注释’#‘移除即可。</li>
+</ol><p>There are <a href="/ss-on-openwrt.html#disqus_thread">comments</a>.</p>                </article>
+            </aside><!-- /#featured -->
+        <section id="extras" class="body">
+                <div class="blogroll">
+                        <h2>blogroll</h2>
+                        <ul>
+                            <li><a href="http://getpelican.com/">Pelican</a></li>
+                            <li><a href="http://python.org/">Python.org</a></li>
+                            <li><a href="http://jinja.pocoo.org/">Jinja2</a></li>
+                            <li><a href="#">You can modify those links in your config file</a></li>
+                        </ul>
+                </div><!-- /.blogroll -->
+                <div class="social">
+                        <h2>social</h2>
+                        <ul>
 
+                            <li><a href="#">You can add links in your config file</a></li>
+                            <li><a href="#">Another social link</a></li>
+                        </ul>
+                </div><!-- /.social -->
+        </section><!-- /#extras -->
 
+        <footer id="contentinfo" class="body">
+                <address id="about" class="vcard body">
+                Proudly powered by <a href="http://getpelican.com/">Pelican</a>, which takes great advantage of <a href="http://python.org">Python</a>.
+                </address><!-- /#about -->
 
-
-
-              </ul>
-            </div>
-          </div>
-        </footer>
-
-    </div>
-
+                <p>The theme is by <a href="http://coding.smashingmagazine.com/2009/08/04/designing-a-html-5-layout-from-scratch/">Smashing Magazine</a>, thanks!</p>
+        </footer><!-- /#contentinfo -->
 
 <script type="text/javascript">
     var disqus_shortname = 'lixusme';
     (function () {
         var s = document.createElement('script'); s.async = true;
         s.type = 'text/javascript';
-        s.src = 'http://' + disqus_shortname + '.disqus.com/count.js';
+        s.src = 'https://' + disqus_shortname + '.disqus.com/count.js';
         (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
     }());
 </script>
-  <script src="/theme/js/libs/jquery-1.9.1.min.js"></script>
-  <script src="/theme/js/libs/gumby.min.js"></script>
-  <script src="/theme/js/plugins.js"></script>
 </body>
 </html>
