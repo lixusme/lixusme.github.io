@@ -85,13 +85,15 @@
 <p>本文下一节将具体介绍如何在OpenWrt实现这一翻墙方案。以下安装是在一台运行14.07版本的Atheros 9341芯片的AP上进行的，对于其它型号的AP或者不同版本的OpenWrt可参照进行。</p>
 <h2>Shadowsocks+GfwList安装</h2>
 <ol>
-<li>安装Shadowsocks  </li>
 <li>
-<p>下载shadowsocks软件包：  </p>
+<p>安装Shadowsocks  </p>
+<ul>
+<li>下载shadowsocks软件包：  </li>
+</ul>
 <p><code>bash
  cd /tmp  
  wget -O shadowsocks.ipk https://sourceforge.net/projects/openwrt-dist/files/shadowsocks-libev/2.4.7-b4060bc/ar71xx/shadowsocks-libev-spec_2.4.7-1_ar71xx.ipk/download</code><br />
-  + 安装： </p>
++ 安装： </p>
 <p><code>bash
   opkg update
   opkg install iptables-mod-nat-extra --force-depends
@@ -99,10 +101,10 @@
   opkg install shadowsocks.ipk --force-overwrite
   /etc/init.d/shadowsocks enable</code>
   若安装过程中有错误提示，使用 <code>opkg list-installed |grep shadowsocks</code>确认下package是否已安装，若已安装可忽略安装中的错误。</p>
-</li>
-<li>
-<p>配置：<br />
-  创建文件 <code>/etc/shadowsocks.json</code>，该文件包含Shadowsocks服务器的信息，文件内容为：  </p>
+<ul>
+<li>配置：<br />
+  创建文件 <code>/etc/shadowsocks.json</code>，该文件包含Shadowsocks服务器的信息，文件内容为：  </li>
+</ul>
 <p _="
 " _1080_="&quot;1080&quot;,
 " _9898_="&quot;9898&quot;,
@@ -122,16 +124,16 @@ GfwList是以正则表达式方式对域名进行描述，为了将GfwList转换
 <li>
 <p>安装DNS相关软件<br />
 如原理章节所述，我们需要通过dnsmasq将GfwList中的域名解析为IP地址放入ipset中供iptables使用。为了防止DNS污染，对于GfwList中的域名，我们采用DNS代理pdnsd，通过TCP协议经由shadowsocks代理到opendns进行解析。</p>
-</li>
-<li>
-<p>安装dnsmasq-full</p>
+<ul>
+<li>安装dnsmasq-full</li>
+</ul>
 <p><code>bash
   opkg remove dnsmasq &amp;&amp; opkg install dnsmasq-full</code>
   编辑文件 <code>/etc/dnsmasq.conf</code>，在文件最后添加一行：
   <code>conf-dir=/etc/dnsmasq.d</code></p>
-</li>
-<li>
-<p>安装pdnsd</p>
+<ul>
+<li>安装pdnsd</li>
+</ul>
 <p><code>bash
   cd /tmp
   wget -O pdnsd.ipk https://downloads.openwrt.org/barrier_breaker/14.07/ar71xx/generic/packages/oldpackages/pdnsd_1.2.9a-par-a8e46ccba7b0fa2230d6c42ab6dcd92926f6c21d_ar71xx.ipk
