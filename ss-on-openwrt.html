@@ -102,17 +102,19 @@
   /etc/init.d/shadowsocks enable</code>
   若安装过程中有错误提示，使用 <code>opkg list-installed |grep shadowsocks</code>确认下package是否已安装，若已安装可忽略安装中的错误。</p>
 <ul>
-<li>配置：<br />
-  创建文件 <code>/etc/shadowsocks.json</code>，该文件包含Shadowsocks服务器的信息，文件内容为：  </li>
+<li>
+<p>配置：<br />
+ 创建文件 <code>/etc/shadowsocks.json</code>，该文件包含Shadowsocks服务器的信息，文件内容为：  </p>
+<p><code>json
+{
+      "server": "X.X.X.X",
+      "server_port": "9898",
+      "password": "password",
+      "local_port": "1080",
+      "method": "rc4-md5"
+}</code></p>
+</li>
 </ul>
-<p _="
-" _1080_="&quot;1080&quot;,
-" _9898_="&quot;9898&quot;,
-" _X.X.X.X_="&quot;X.X.X.X&quot;,
-" _local_port_:="&quot;local_port&quot;:" _method_:="&quot;method&quot;:" _password_="&quot;password&quot;,
-" _password_:="&quot;password&quot;:" _rc4-md5_="&quot;rc4-md5&quot;
-" _server_:="&quot;server&quot;:" _server_port_:="&quot;server_port&quot;:">```json</p>
-<p>```</p>
 </li>
 <li>
 <p>安装GfwList<br />
