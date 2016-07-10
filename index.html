@@ -1,29 +1,64 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
+
         <title>Lixus</title>
         <meta charset="utf-8" />
+
+
+        <!-- Mobile viewport optimized: j.mp/bplateviewport -->
+        <meta name="viewport" content="width=device-width,initial-scale=1, maximum-scale=1">
+
+        <link rel="stylesheet" type="text/css" href="/theme/gumby.css" />
+        <link rel="stylesheet" type="text/css" href="/theme/style.css" />
+        <link rel="stylesheet" type="text/css" href="/theme/pygment.css" />
+
+        <script src="/theme/js/libs/modernizr-2.6.2.min.js"></script>
+
+
+
+
 </head>
 
 <body id="index" class="home">
-        <header id="banner" class="body">
-                <h1><a href="/">Lixus <strong></strong></a></h1>
-        </header><!-- /#banner -->
-        <nav id="menu"><ul>
-        </ul></nav><!-- /#menu -->
-<section id="content">
-<h2>All articles</h2>
 
-<ol id="post-list">
-        <li><article class="hentry">
-                <header> <h2 class="entry-title"><a href="/ss-on-openwrt.html" rel="bookmark" title="Permalink to OpenWrt科学上网原理及配置">OpenWrt科学上网原理及配置</a></h2> </header>
-                <footer class="post-info">
-                    <abbr class="published" title="2016-07-09T00:00:00+08:00"> 六 09 七月 2016 </abbr>
-                    <address class="vcard author">By
-                        <a class="url fn" href="/author/lixus.html">lixus</a>
-                    </address>
-                </footer><!-- /.post-info -->
-                <div class="entry-content"> <h2>翻墙方案原理</h2>
+
+    <div class="container">
+
+        <div class="row">
+
+          <header id="banner" class="body">
+                  <h1><a href="/">Lixus <strong></strong></a></h1>
+          </header><!-- /#banner -->
+
+            <div id="navigation" class="navbar row">
+              <a href="#" gumby-trigger="#navigation &gt; ul" class="toggle"><i class="icon-menu"></i></a>
+             
+              <ul class="columns">
+                <li><a href="/">Home</a></li>
+
+
+              </ul>
+            </div>
+
+<section id="content">
+
+
+
+   <div class="row">
+
+
+        <div class="eleven columns">
+                 <ol id="post-list">
+                        <li><article class="hentry">
+                                <header> <h2 class="entry-title"><a href="/ss-on-openwrt.html" rel="bookmark" title="Permalink to OpenWrt科学上网原理及配置">OpenWrt科学上网原理及配置</a></h2> </header>
+                                <footer class="post-info">
+                                    <abbr class="published" title="2016-07-09T00:00:00+08:00"> 六 09 七月 2016 </abbr>
+                                    <address class="vcard author">By 
+                                    <a class="url fn" href="/author/lixus.html"> lixus</a>
+                                    </address>
+                                </footer><!-- /.post-info -->
+                                <div class="entry-content"> <h2>翻墙方案原理</h2>
 <p>在OpenWrt上安装Shadowsocks实现自动翻墙一般有三种方案（参见 <a href="https://cokebar.info/archives/664">飞羽博客</a>）。不管采用哪种方式，其基本原理都是一样的：使用Shadowsocks建立透明代理，再按一定的规则将需要翻墙的流量导入到该透明代理。这三种方案的区别就在于判别翻墙流量的规则。</p>
 <p>以下分别对这三种方案进行简单介绍，并对其中的最优方案的实现做详细介绍。</p>
 <ol>
@@ -39,14 +74,102 @@
 <ol>
 <li>Shadowsocks + GfwList<br />
    该方案根据GfwList中的域名判断是否走代理。位于GfwList中的域名走Shadowsocks代理，不在GfwList中的域名不走代理。由于Linux的iptables只能根据IP地址做定向 ...</li></ol> </div><!-- /.entry-content -->
-        </article></li>
-</ol><!-- /#posts-list -->
+
+                                <div class="medium primary btn"><a href="/ss-on-openwrt.html" rel="bookmark" title="Permalink to OpenWrt科学上网原理及配置">Read more <i class="icon-arrow-right"></i></a></div>
+
+
+
+                                <div class="row tag-row">
+                                        <span>Tagged as : </span>
+                                            <a class="danger label" href="/tag/embedded.html">embedded</a>
+                                </div>
+
+
+
+                        </article></li>
+                </ol><!-- /#posts-list -->
+
+        </div><!-- /.eleven.columns -->
+        
+<div class="three columns">
+
+<h4>Pages</h4>
+
+ <ul>
+  </ul>
+
+<h4>Categories</h4>
+<ul class="blank">
+		<li><a href="/category/misc.html">misc</a></li>
+</ul>
+
+
+<h4>Tags</h4>
+	<ul class="blank">
+</ul>
+
+
+<nav class="widget">
+  <h4>Social</h4>
+  <ul class="blank">
+    <li><a href="#">You can add links in your config file</a></li>
+    <li><a href="#">Another social link</a></li>
+  </ul>
+</nav>
+
+</div> </div><!-- /.row -->
+
+<p class="paginator">
+    Page 1 / 1
+</p>
 </section><!-- /#content -->
-        <footer id="contentinfo" class="body">
-                <address id="about" class="vcard body">
-                Proudly powered by <a href="http://getpelican.com/">Pelican</a>,
-                which takes great advantage of <a href="http://python.org">Python</a>.
-                </address><!-- /#about -->
-        </footer><!-- /#contentinfo -->
+
+       </div><!-- /.row -->
+    </div><!-- /.container -->
+
+
+       <div class="container.nopad bg">
+
+    
+        <footer id="credits" class="row">
+          <div class="seven columns left-center">
+
+                   <address id="about" class="vcard body">
+                    Proudly powered by <a href="http://getpelican.com/">Pelican</a>,
+                    which takes great advantage of <a href="http://python.org">Python</a>.
+                    <br />
+                    Based on the <a target="_blank" href="http://gumbyframework.com">Gumby Framework</a>
+                    </address>
+          </div>
+
+
+          <div class="seven columns">
+            <div class="row">
+              <ul class="socbtns">
+
+
+
+
+
+              </ul>
+            </div>
+          </div>
+        </footer>
+
+    </div>
+
+
+<script type="text/javascript">
+    var disqus_shortname = 'lixusme';
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = 'http://' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+</script>
+  <script src="/theme/js/libs/jquery-1.9.1.min.js"></script>
+  <script src="/theme/js/libs/gumby.min.js"></script>
+  <script src="/theme/js/plugins.js"></script>
 </body>
 </html>
