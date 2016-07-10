@@ -90,10 +90,9 @@
 <ul>
 <li>下载shadowsocks软件包：  </li>
 </ul>
-<p>:::bash
- cd /tmp<br />
- wget -O shadowsocks.ipk https://sourceforge.net/projects/openwrt-dist/files/shadowsocks-libev/2.4.7-b4060bc/ar71xx/shadowsocks-libev-spec_2.4.7-1_ar71xx.ipk/download
- ~~~  </p>
+<p><code>bash
+ cd /tmp  
+ wget -O shadowsocks.ipk https://sourceforge.net/projects/openwrt-dist/files/shadowsocks-libev/2.4.7-b4060bc/ar71xx/shadowsocks-libev-spec_2.4.7-1_ar71xx.ipk/download</code>  </p>
 <ul>
 <li>安装： </li>
 </ul>
@@ -143,8 +142,8 @@ opkg remove dnsmasq &amp;&amp; opkg install dnsmasq-full</code>
 cd /tmp
 wget -O pdnsd.ipk https://downloads.openwrt.org/barrier_breaker/14.07/ar71xx/generic/packages/oldpackages/pdnsd_1.2.9a-par-a8e46ccba7b0fa2230d6c42ab6dcd92926f6c21d_ar71xx.ipk
 opkg install pdnsd.ipk
-/etc/init.d/pdnsd enable</code>
-编辑文件 <code>/etc/pdnsd.conf</code>，文件内容如下：</p>
+/etc/init.d/pdnsd enable</code></p>
+<p>编辑文件 <code>/etc/pdnsd.conf</code>，文件内容如下：</p>
 <p>```ini
        global {
 perm_cache=1024;
@@ -169,10 +168,10 @@ udpbufsize=1024;   # Upper limit on the size of UDP messages.
         timeout = 4;
         uptest = none;            # Test availability using ICMP echo requests.
 }
-```
-    为了让对opendns的查询走shadowsocks代理，需要将opendns的IP加入gfwlist这个ipset。可以在shadowsocks启动时加入，具体配置在下面一并给出。</p>
+```</p>
 </li>
 </ul>
+<p>为了让对opendns的查询走shadowsocks代理，需要将opendns的IP加入gfwlist这个ipset。可以在shadowsocks启动时加入，具体配置在下面一并给出。</p>
 </li>
 <li>
 <p>配置iptables和ipset<br />
