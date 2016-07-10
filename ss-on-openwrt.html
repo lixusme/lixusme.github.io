@@ -118,60 +118,56 @@
 </li>
 <li>
 <p>安装GfwList<br />
-GfwList是以正则表达式方式对域名进行描述，为了将GfwList转换为可以被dnsmasq使用的格式，需要下载一个转换工具：<a href="https://github.com/cokebar/gfwlist2dnsmasq">https://github.com/cokebar/gfwlist2dnsmasq</a>.</p>
+    GfwList是以正则表达式方式对域名进行描述，为了将GfwList转换为可以被dnsmasq使用的格式，需要下载一个转换工具：<a href="https://github.com/cokebar/gfwlist2dnsmasq">https://github.com/cokebar/gfwlist2dnsmasq</a>.</p>
+<p>将该软件下载到本地后，修改文件<code>gfwlist2dnsmasq.py: mydnsport = '5300'</code>，然后执行 <code>python gfwlist2dnsmasq.py</code>，将在当前文件夹下生成文件<code>dnsmasq_list.conf</code>。在OpenWrt中创建目录<code>/etc/dnsmasq.d</code>并将<code>dnsmasq_list.conf</code>放入其中。  </p>
 </li>
-</ol>
-<p>将该软件下载到本地后，修改文件<code>gfwlist2dnsmasq.py: mydnsport = '5300'</code>，然后执行 <code>python gfwlist2dnsmasq.py</code>，将在当前文件夹下生成文件<code>dnsmasq_list.conf</code>。在OpenWrt中创建目录<code>/etc/dnsmasq.d</code>并将<code>dnsmasq_list.conf</code>放入其中。</p>
-<ol>
 <li>
 <p>安装DNS相关软件<br />
 如原理章节所述，我们需要通过dnsmasq将GfwList中的域名解析为IP地址放入ipset中供iptables使用。为了防止DNS污染，对于GfwList中的域名，我们采用DNS代理pdnsd，通过TCP协议经由shadowsocks代理到opendns进行解析。</p>
 <ul>
-<li>安装dnsmasq-full</li>
-</ul>
+<li>
+<p>安装dnsmasq-full</p>
 <p><code>bash
-  opkg remove dnsmasq &amp;&amp; opkg install dnsmasq-full</code>
-  编辑文件 <code>/etc/dnsmasq.conf</code>，在文件最后添加一行：
-  <code>conf-dir=/etc/dnsmasq.d</code></p>
-<ul>
-<li>安装pdnsd</li>
-</ul>
+opkg remove dnsmasq &amp;&amp; opkg install dnsmasq-full</code>
+   编辑文件 <code>/etc/dnsmasq.conf</code>，在文件最后添加一行：
+<code>conf-dir=/etc/dnsmasq.d</code></p>
+</li>
+<li>
+<p>安装pdnsd</p>
 <p><code>bash
-  cd /tmp
-  wget -O pdnsd.ipk https://downloads.openwrt.org/barrier_breaker/14.07/ar71xx/generic/packages/oldpackages/pdnsd_1.2.9a-par-a8e46ccba7b0fa2230d6c42ab6dcd92926f6c21d_ar71xx.ipk
-  opkg install pdnsd.ipk
-  /etc/init.d/pdnsd enable</code>
-  编辑文件 <code>/etc/pdnsd.conf</code>，文件内容如下：</p>
-<div class="highlight"><pre><span></span>  ```ini
-  global {
-    perm_cache=1024;
-    cache_dir=&quot;/var/pdnsd&quot;;
-    run_as=&quot;nobody&quot;;
-    server_ip = 127.0.0.1;  # Use eth0 here if you want to allow other
-                            # machines on your network to query pdnsd.
-    server_port=5300;      #监听5300端口
-    status_ctl = on;
-                       # but may make pdnsd less efficient, unfortunately.
-    query_method=tcp_only;  #强制tcp解析dos
-    min_ttl=15m;       # Retain cached entries at least 15 minutes.
-    max_ttl=1w;        # One week.
-    timeout=10;        # Global timeout option (10 seconds).
-    neg_domain_pol=on;
-    udpbufsize=1024;   # Upper limit on the size of UDP messages.
-    }
-
-    server {
-            label = &quot;opendns&quot;;
-            ip = 208.67.222.222, 208.67.220.220;
-            port = 5353;
-            timeout = 4;
-            uptest = none;            # Test availability using ICMP echo requests.
-    }
-  ```
-  为了让对opendns的查询走shadowsocks代理，需要将opendns的IP加入gfwlist这个ipset。可以在shadowsocks启动时加入，具体配置在下面一并给出。
-</pre></div>
-
-
+cd /tmp
+wget -O pdnsd.ipk https://downloads.openwrt.org/barrier_breaker/14.07/ar71xx/generic/packages/oldpackages/pdnsd_1.2.9a-par-a8e46ccba7b0fa2230d6c42ab6dcd92926f6c21d_ar71xx.ipk
+opkg install pdnsd.ipk
+/etc/init.d/pdnsd enable</code>
+编辑文件 <code>/etc/pdnsd.conf</code>，文件内容如下：</p>
+<p>```ini
+       global {
+perm_cache=1024;
+cache_dir="/var/pdnsd";
+run_as="nobody";
+server_ip = 127.0.0.1;  # Use eth0 here if you want to allow other
+                        # machines on your network to query pdnsd.
+server_port=5300;      #监听5300端口
+status_ctl = on;
+                   # but may make pdnsd less efficient, unfortunately.
+query_method=tcp_only;  #强制tcp解析dos
+min_ttl=15m;       # Retain cached entries at least 15 minutes.
+max_ttl=1w;        # One week.
+timeout=10;        # Global timeout option (10 seconds).
+neg_domain_pol=on;
+udpbufsize=1024;   # Upper limit on the size of UDP messages.
+}</p>
+<p>server {
+        label = "opendns";
+        ip = 208.67.222.222, 208.67.220.220;
+        port = 5353;
+        timeout = 4;
+        uptest = none;            # Test availability using ICMP echo requests.
+}
+```
+    为了让对opendns的查询走shadowsocks代理，需要将opendns的IP加入gfwlist这个ipset。可以在shadowsocks启动时加入，具体配置在下面一并给出。</p>
+</li>
+</ul>
 </li>
 <li>
 <p>配置iptables和ipset<br />
