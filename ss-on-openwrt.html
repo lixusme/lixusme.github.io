@@ -78,16 +78,14 @@
 </li>
 <li>
 <p>Shadowsocks + GfwList<br />
-   该方案根据GfwList中的域名判断是否走代理。位于GfwList中的域名走Shadowsocks代理，不在GfwList中的域名不走代理。由于Linux的iptables只能根据IP地址做定向，我们需要通过dnsmasq-full将GfwList中的域名解析为IP加到一个ipset中，iptables根据这个ipset来判定是否需要走Shadowsocks代理。需要注意的是，对于GfwList的域名解析，不能使用国内的DNS服务器进行解析，因为国内DNS对GfwList中的域名会进行污染解析，具体原理见维基百科中的 <a href="https://zh.wikipedia.org/zh-cn/%E5%9F%9F%E5%90%8D%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%BC%93%E5%AD%98%E6%B1%A1%E6%9F%93#cite_note-3">域名服务器缓存污染</a> 词条。</p>
+   该方案根据GfwList中的域名判断是否走代理。位于GfwList中的域名走Shadowsocks代理，不在GfwList中的域名不走代理。由于Linux的iptables只能根据IP地址做定向，我们需要通过dnsmasq-full将GfwList中的域名解析为IP加到一个ipset中，iptables根据这个ipset来判定是否需要走Shadowsocks代理。需要注意的是，对于GfwList的域名解析，不能使用国内的DNS服务器进行解析，因为国内DNS对GfwList中的域名会进行污染解析，具体原理见维基百科中的 <a href="https://zh.wikipedia.org/zh-cn/%E5%9F%9F%E5%90%8D%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%BC%93%E5%AD%98%E6%B1%A1%E6%9F%93#cite_note-3">域名服务器缓存污染</a> 词条。<br />
+   从工作原理来看，此方案是翻墙的最优方案，唯一的问题是GfwList中的域名可能未涵盖全部被墙的域名，解决方案是定期对GfwList进行更新，或者手工将遗漏的域名添加到list中去。</p>
 </li>
 </ol>
-<p>从工作原理来看，此方案是翻墙的最优方案，唯一的问题是GfwList中的域名可能未涵盖全部被墙的域名，解决方案是定期对GfwList进行更新，或者手工将遗漏的域名添加到list中去。</p>
 <p>本文下一节将具体介绍如何在OpenWrt实现这一翻墙方案。以下安装是在一台运行14.07版本的Atheros 9341芯片的AP上进行的，对于其它型号的AP或者不同版本的OpenWrt可参照进行。</p>
 <h2>Shadowsocks+GfwList安装</h2>
 <ol>
-<li>
-<p>安装Shadowsocks  </p>
-</li>
+<li>安装Shadowsocks  </li>
 <li>
 <p>下载shadowsocks软件包：  </p>
 <p><code>bash
@@ -116,7 +114,7 @@
 </li>
 <li>
 <p>安装GfwList<br />
-GfwList是以正则表达式方式对域名进行描述，为了将GfwList转换为可以被dnsmasq使用的格式，需要下载一个转换工具：<a href="https://github.com/cokebar/gfwlist2dnsmasq">https://github.com/cokebar/gfwlist2dnsmasq</a></p>
+GfwList是以正则表达式方式对域名进行描述，为了将GfwList转换为可以被dnsmasq使用的格式，需要下载一个转换工具：<a href="https://github.com/cokebar/gfwlist2dnsmasq">https://github.com/cokebar/gfwlist2dnsmasq</a>.</p>
 </li>
 </ol>
 <p>将该软件下载到本地后，修改文件<code>gfwlist2dnsmasq.py: mydnsport = '5300'</code>，然后执行 <code>python gfwlist2dnsmasq.py</code>，将在当前文件夹下生成文件<code>dnsmasq_list.conf</code>。在OpenWrt中创建目录<code>/etc/dnsmasq.d</code>并将<code>dnsmasq_list.conf</code>放入其中。</p>
@@ -172,56 +170,49 @@ GfwList是以正则表达式方式对域名进行描述，为了将GfwList转换
 
 </li>
 <li>
-<p>配置iptables和ipset  </p>
+<p>配置iptables和ipset<br />
+   至此基本安装工作已经完成，Shadowsocks代理已经监听在TCP 1080端口，只需要配置iptables将对ipset gwlist中IP的访问导向1080端口即可。为了简单起见，我们可以直接把相关配置包括上述的opendns定向放入shadowsocks的启动文件 <code>/etc/init.d/shadowsocks</code>，修改后该文件的内容如下：</p>
+<p>```bash</p>
+<h1>!/bin/sh /etc/rc.common</h1>
+<p>START=95</p>
+<p>SERVICE_USE_PID=1
+SERVICE_WRITE_PID=1
+SERVICE_DAEMONIZE=1
+SERVICE_PID_FILE=/var/run/shadowsocks.pid
+CONFIG=/etc/shadowsocks.json
+DNS=8.8.8.8:53
+TUNNEL_PORT=5353</p>
+<p>start() {
+    # Client Mode
+    #service_start /usr/bin/ss-local -c $CONFIG -b 0.0.0.0 -f $SERVICE_PID_FILE
+    # Proxy Mode
+    service_start /usr/bin/ss-redir -c $CONFIG -b 0.0.0.0 -f $SERVICE_PID_FILE
+    # Tunnel
+    #service_start /usr/bin/ss-tunnel -c $CONFIG -b 0.0.0.0 -u -l $TUNNEL_PORT -L $DNS
+    # set up ipset
+    ipset -N gfwlist iphash
+    ipset add gfwlist 208.67.222.222
+    ipset add gfwlist 208.67.220.220
+    # iptables: redirect gfwlst to ss
+    iptables -t nat -A PREROUTING -p tcp -m set --match-set gfwlist dst -j REDIRECT --to-port 1080
+    # FOR BRIDGED AP: redirect dns query to local dnsmasq
+    #iptables -t nat -A PREROUTING -p udp --dport 53 -j DNAT --to 192.168.1.1:53
+    #iptables -t nat -A PREROUTING -p tcp --dport 53 -j DNAT --to 192.168.1.1:53  <br />
+}</p>
+<p>stop() {
+    # Client Mode
+    #service_stop /usr/bin/ss-local
+    # Proxy Mode
+    service_stop /usr/bin/ss-redir
+    # Tunnel
+    #service_stop /usr/bin/ss-tunnel
+}
+```   </p>
 </li>
-</ol>
-<p>至此基本安装工作已经完成，Shadowsocks代理已经监听在TCP 1080端口，只需要配置iptables将对ipset gwlist中IP的访问导向1080端口即可。为了简单起见，我们可以直接把相关配置包括上述的opendns定向放入shadowsocks的启动文件 <code>/etc/init.d/shadowsocks</code>，修改后该文件的内容如下：</p>
-<div class="highlight"><pre><span></span><span class="x">```bash</span>
-<span class="err">#</span><span class="x">!/bin/sh /etc/rc.common</span>
-
-<span class="x">START=95</span>
-
-<span class="x">SERVICE_USE_PID=1</span>
-<span class="x">SERVICE_WRITE_PID=1</span>
-<span class="x">SERVICE_DAEMONIZE=1</span>
-<span class="x">SERVICE_PID_FILE=/var/run/shadowsocks.pid</span>
-<span class="x">CONFIG=/etc/shadowsocks.json</span>
-<span class="x">DNS=8.8.8.8:53</span>
-<span class="x">TUNNEL_PORT=5353</span>
-
-<span class="x">start() </span><span class="err">{</span><span class="x"></span>
-<span class="x">    </span><span class="err">#</span><span class="x"> Client Mode</span>
-<span class="x">    </span><span class="cp">#</span><span class="nf">service_start</span><span class="x"> /usr/bin/ss-local -c </span><span class="p">$</span><span class="nv">CONFIG</span><span class="x"> -b 0.0.0.0 -f </span><span class="p">$</span><span class="nv">SERVICE_PID_FILE</span><span class="x"></span>
-<span class="x">    </span><span class="err">#</span><span class="x"> Proxy Mode</span>
-<span class="x">    service_start /usr/bin/ss-redir -c </span><span class="p">$</span><span class="nv">CONFIG</span><span class="x"> -b 0.0.0.0 -f </span><span class="p">$</span><span class="nv">SERVICE_PID_FILE</span><span class="x"></span>
-<span class="x">    </span><span class="err">#</span><span class="x"> Tunnel</span>
-<span class="x">    </span><span class="cp">#</span><span class="nf">service_start</span><span class="x"> /usr/bin/ss-tunnel -c </span><span class="p">$</span><span class="nv">CONFIG</span><span class="x"> -b 0.0.0.0 -u -l </span><span class="p">$</span><span class="nv">TUNNEL_PORT</span><span class="x"> -L </span><span class="p">$</span><span class="nv">DNS</span><span class="x"></span>
-<span class="x">    </span><span class="err">#</span><span class="x"> set up ipset</span>
-<span class="x">    ipset -N gfwlist iphash</span>
-<span class="x">    ipset add gfwlist 208.67.222.222</span>
-<span class="x">    ipset add gfwlist 208.67.220.220</span>
-<span class="x">    </span><span class="err">#</span><span class="x"> iptables: redirect gfwlst to ss</span>
-<span class="x">    iptables -t nat -A PREROUTING -p tcp -m set --match-set gfwlist dst -j REDIRECT --to-port 1080</span>
-<span class="x">    </span><span class="err">#</span><span class="x"> FOR BRIDGED AP: redirect dns query to local dnsmasq</span>
-<span class="x">    </span><span class="cp">#</span><span class="nf">iptables</span><span class="x"> -t nat -A PREROUTING -p udp --dport 53 -j DNAT --to 192.168.1.1:53</span>
-<span class="x">    </span><span class="cp">#</span><span class="nf">iptables</span><span class="x"> -t nat -A PREROUTING -p tcp --dport 53 -j DNAT --to 192.168.1.1:53    </span>
-<span class="x">}</span>
-
-<span class="x">stop() </span><span class="err">{</span><span class="x"></span>
-<span class="x">    </span><span class="err">#</span><span class="x"> Client Mode</span>
-<span class="x">    </span><span class="cp">#</span><span class="nf">service_stop</span><span class="x"> /usr/bin/ss-local</span>
-<span class="x">    </span><span class="err">#</span><span class="x"> Proxy Mode</span>
-<span class="x">    service_stop /usr/bin/ss-redir</span>
-<span class="x">    </span><span class="err">#</span><span class="x"> Tunnel</span>
-<span class="x">    </span><span class="cp">#</span><span class="nf">service_stop</span><span class="x"> /usr/bin/ss-tunnel</span>
-<span class="x">}</span>
-<span class="x">```</span>
-</pre></div>
-
-
-<ol>
-<li>桥模式AP的DNS重定向配置<br />
-如果AP工作于桥模式，由于DNS查询不经过OpenWrt的本地dnsmasq，导致无法将GfwList中的域名解析到ipset实现自动翻墙。解决方案是将所有经由该AP的DNS查询重定向到本地的dnsmasq，只需将文件<code>/etc/init.d/shadowsocks</code> 中 "# FOR BRIDGED AP"下面两行的注释’#‘移除即可。</li>
+<li>
+<p>桥模式AP的DNS重定向配置<br />
+如果AP工作于桥模式，由于DNS查询不经过OpenWrt的本地dnsmasq，导致无法将GfwList中的域名解析到ipset实现自动翻墙。解决方案是将所有经由该AP的DNS查询重定向到本地的dnsmasq，只需将文件<code>/etc/init.d/shadowsocks</code> 中 "# FOR BRIDGED AP"下面两行的注释’#‘移除即可。</p>
+</li>
 </ol>
             </div><!-- /.entry-content -->
             <div class="comments">
