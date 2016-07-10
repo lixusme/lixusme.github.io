@@ -144,7 +144,7 @@ wget -O pdnsd.ipk https://downloads.openwrt.org/barrier_breaker/14.07/ar71xx/gen
 opkg install pdnsd.ipk
 /etc/init.d/pdnsd enable</code></p>
 <p>编辑文件 <code>/etc/pdnsd.conf</code>，文件内容如下：</p>
-<p>```
+<p>```ini
        global {
 perm_cache=1024;
 cache_dir="/var/pdnsd";
@@ -169,14 +169,14 @@ udpbufsize=1024;   # Upper limit on the size of UDP messages.
         uptest = none;            # Test availability using ICMP echo requests.
 }
 ```</p>
+<p>为了让对opendns的查询走shadowsocks代理，需要将opendns的IP加入gfwlist这个ipset。可以在shadowsocks启动时加入，具体配置在下面一并给出。</p>
 </li>
 </ul>
-<p>为了让对opendns的查询走shadowsocks代理，需要将opendns的IP加入gfwlist这个ipset。可以在shadowsocks启动时加入，具体配置在下面一并给出。</p>
 </li>
 <li>
 <p>配置iptables和ipset<br />
    至此基本安装工作已经完成，Shadowsocks代理已经监听在TCP 1080端口，只需要配置iptables将对ipset gwlist中IP的访问导向1080端口即可。为了简单起见，我们可以直接把相关配置包括上述的opendns定向放入shadowsocks的启动文件 <code>/etc/init.d/shadowsocks</code>，修改后该文件的内容如下：</p>
-<p>```</p>
+<p>```bash</p>
 <h1>!/bin/sh /etc/rc.common</h1>
 <p>START=95</p>
 <p>SERVICE_USE_PID=1
