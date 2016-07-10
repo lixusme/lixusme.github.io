@@ -92,8 +92,10 @@
 </ul>
 <p><code>bash
  cd /tmp  
- wget -O shadowsocks.ipk https://sourceforge.net/projects/openwrt-dist/files/shadowsocks-libev/2.4.7-b4060bc/ar71xx/shadowsocks-libev-spec_2.4.7-1_ar71xx.ipk/download</code><br />
-+ 安装： </p>
+ wget -O shadowsocks.ipk https://sourceforge.net/projects/openwrt-dist/files/shadowsocks-libev/2.4.7-b4060bc/ar71xx/shadowsocks-libev-spec_2.4.7-1_ar71xx.ipk/download</code>  </p>
+<ul>
+<li>安装： </li>
+</ul>
 <p><code>bash
   opkg update
   opkg install iptables-mod-nat-extra --force-depends
@@ -102,24 +104,26 @@
   /etc/init.d/shadowsocks enable</code>
   若安装过程中有错误提示，使用 <code>opkg list-installed |grep shadowsocks</code>确认下package是否已安装，若已安装可忽略安装中的错误。</p>
 <ul>
-<li>
-<p>配置：<br />
- 创建文件 <code>/etc/shadowsocks.json</code>，该文件包含Shadowsocks服务器的信息，文件内容为：  </p>
-<p><code>json
-{
-      "server": "X.X.X.X",
-      "server_port": "9898",
-      "password": "password",
-      "local_port": "1080",
-      "method": "rc4-md5"
-}</code></p>
-</li>
+<li>配置：</li>
 </ul>
+<p>创建文件 <code>/etc/shadowsocks.json</code>，该文件包含Shadowsocks服务器的信息，文件内容为：  </p>
+<div class="highlight"><pre><span></span>```json
+{
+      &quot;server&quot;: &quot;X.X.X.X&quot;,
+      &quot;server_port&quot;: &quot;9898&quot;,
+      &quot;password&quot;: &quot;password&quot;,
+      &quot;local_port&quot;: &quot;1080&quot;,
+      &quot;method&quot;: &quot;rc4-md5&quot;
+}
+```
+</pre></div>
+
+
 </li>
 <li>
 <p>安装GfwList<br />
-    GfwList是以正则表达式方式对域名进行描述，为了将GfwList转换为可以被dnsmasq使用的格式，需要下载一个转换工具：<a href="https://github.com/cokebar/gfwlist2dnsmasq">https://github.com/cokebar/gfwlist2dnsmasq</a>.</p>
-<p>将该软件下载到本地后，修改文件<code>gfwlist2dnsmasq.py: mydnsport = '5300'</code>，然后执行 <code>python gfwlist2dnsmasq.py</code>，将在当前文件夹下生成文件<code>dnsmasq_list.conf</code>。在OpenWrt中创建目录<code>/etc/dnsmasq.d</code>并将<code>dnsmasq_list.conf</code>放入其中。  </p>
+    GfwList是以正则表达式方式对域名进行描述，为了将GfwList转换为可以被dnsmasq使用的格式，需要下载一个转换工具：<a href="https://github.com/cokebar/gfwlist2dnsmasq">https://github.com/cokebar/gfwlist2dnsmasq</a>.<br />
+将该软件下载到本地后，修改文件<code>gfwlist2dnsmasq.py: mydnsport = '5300'</code>，然后执行 <code>python gfwlist2dnsmasq.py</code>，将在当前文件夹下生成文件<code>dnsmasq_list.conf</code>。在OpenWrt中创建目录<code>/etc/dnsmasq.d</code>并将<code>dnsmasq_list.conf</code>放入其中。  </p>
 </li>
 <li>
 <p>安装DNS相关软件<br />
