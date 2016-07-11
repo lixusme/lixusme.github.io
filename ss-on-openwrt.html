@@ -66,11 +66,11 @@
 <p>在OpenWrt上安装Shadowsocks实现自动翻墙一般有三种方案（参见 <a href="https://cokebar.info/archives/664">飞羽博客</a>）。不管采用哪种方式，其基本原理都是一样的：使用Shadowsocks建立透明代理，再按一定的规则将需要翻墙的流量导入到该透明代理。这三种方案的区别就在于判别翻墙流量的规则。</p>
 <p>以下分别对这三种方案进行简单介绍，并对其中的最优方案的实现做详细介绍。</p>
 <ol>
-<li>
-<p>Shadowsocks + ChinaDNS<br />
-  该方案采用 <a href="https://github.com/shadowsocks/ChinaDNS">ChinaDNS</a> 的解析结果对需要翻墙的流量进行识别。ChinaDNS的原理为：配置至少一个国内DNS服务器和一个国外DNS服务器，ChinaDNS收到由OpenWrt Dnsmasq转发来的用户DNS请求后，同时向这些DNS服务器发送请求。如果从国内DNS服务器返回的结果为国外IP，则选用国外DNS服务器的解析结果，否则选择国内DNS的解析结果返回给用户。为了防止DNS污染，对国外DNS服务器的访问需要通过Shadowsocks或者VPN进行中转。<br />
-  采用该方案所有访问国外IP的流量都要经过Shadowsocks中转，而且ChinaDNS对国内DNS服务器的访问容易受到DNS污染，例如，当被墙的国外网站被污染的国内DNS服务器解析为国内IP时，该方案无法将被墙的网站导向Shadowsocks代理。</p>
-</li>
+<li>Shadowsocks + ChinaDNS<br />
+  该方案采用 <a href="https://github.com/shadowsocks/ChinaDNS">ChinaDNS</a> 的解析结果对需要翻墙的流量进行识别。ChinaDNS的原理为：配置至少一个国内DNS服务器和一个国外DNS服务器，ChinaDNS收到由OpenWrt Dnsmasq转发来的用户DNS请求后，同时向这些DNS服务器发送请求。如果从国内DNS服务器返回的结果为国外IP，则选用国外DNS服务器的解析结果，否则选择国内DNS的解析结果返回给用户。为了防止DNS污染，对国外DNS服务器的访问需要通过Shadowsocks或者VPN进行中转。  </li>
+</ol>
+<p>采用该方案所有访问国外IP的流量都要经过Shadowsocks中转，而且ChinaDNS对国内DNS服务器的访问容易受到DNS污染，例如，当被墙的国外网站被污染的国内DNS服务器解析为国内IP时，该方案无法将被墙的网站导向Shadowsocks代理。</p>
+<ol>
 <li>
 <p>Shadowsocks + Redsock<br />
   该方案依靠 <a href="https://github.com/semigodking/redsocks">Redsocks2</a> 的自动判断机制识别被墙的IP，Redsocks2的原理为：Redsocks2在其监听端口接收通过iptables定向来的TCP连接，首先尝试不通过Shadowsocks代理而是直接将这些连接进行中转。当直接中转发生错误或者连接超时时，Redsocks2才会再次将这些遇到问题的连接通过Shadowsocks代理中转。<br />
@@ -154,7 +154,7 @@ server_ip = 127.0.0.1;  # Use eth0 here if you want to allow other
 server_port=5300;      #监听5300端口
 status_ctl = on;
                    # but may make pdnsd less efficient, unfortunately.
-query_method=tcp_only;  #强制tcp解析dos
+query_method=tcp_only;  #强制tcp解析dns
 min_ttl=15m;       # Retain cached entries at least 15 minutes.
 max_ttl=1w;        # One week.
 timeout=10;        # Global timeout option (10 seconds).
