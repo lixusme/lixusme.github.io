@@ -107,7 +107,7 @@
 <li>配置：</li>
 </ul>
 <p>创建文件 <code>/etc/shadowsocks.json</code>，该文件包含Shadowsocks服务器的信息，文件内容为：  </p>
-<div class="highlight"><pre><span></span>~~~json
+<div class="codehilite"><pre><span></span>```json
 {
       &quot;server&quot;: &quot;X.X.X.X&quot;,
       &quot;server_port&quot;: &quot;9898&quot;,
@@ -115,7 +115,7 @@
       &quot;local_port&quot;: &quot;1080&quot;,
       &quot;method&quot;: &quot;rc4-md5&quot;
 }
-~~~
+```
 </pre></div>
 
 
@@ -133,8 +133,9 @@
 <p>安装dnsmasq-full</p>
 <p><code>bash
 opkg remove dnsmasq &amp;&amp; opkg install dnsmasq-full</code>
-   编辑文件 <code>/etc/dnsmasq.conf</code>，在文件最后添加一行：
-<code>conf-dir=/etc/dnsmasq.d</code></p>
+   编辑文件 <code>/etc/dnsmasq.conf</code>，在文件最后添加一行：</p>
+<p><code>ini
+conf-dir=/etc/dnsmasq.d</code></p>
 </li>
 <li>
 <p>安装pdnsd</p>
