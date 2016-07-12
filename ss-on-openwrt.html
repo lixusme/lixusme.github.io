@@ -90,30 +90,32 @@
 <ul>
 <li>下载shadowsocks软件包：  </li>
 </ul>
-<p>```shell
- cd /tmp<br />
- wget -O shadowsocks.ipk https://sourceforge.net/projects/openwrt-dist/files/shadowsocks-libev/2.4.7-b4060bc/ar71xx/shadowsocks-libev-spec_2.4.7-1_ar71xx.ipk/download</p>
+<p><code>bash
+ cd /tmp  
+ wget -O shadowsocks.ipk https://sourceforge.net/projects/openwrt-dist/files/shadowsocks-libev/2.4.7-b4060bc/ar71xx/shadowsocks-libev-spec_2.4.7-1_ar71xx.ipk/download</code>  </p>
 <ul>
 <li>安装： </li>
 </ul>
-<p>```shell
+<p><code>bash
   opkg update
   opkg install iptables-mod-nat-extra --force-depends
   opkg install ipset libopenssl
   opkg install shadowsocks.ipk --force-overwrite
-  /etc/init.d/shadowsocks enable</p>
+  /etc/init.d/shadowsocks enable</code></p>
 <p>若安装过程中有错误提示，使用 <code>opkg list-installed |grep shadowsocks</code>确认下package是否已安装，若已安装可忽略安装中的错误。</p>
 <ul>
 <li>配置：</li>
 </ul>
 <p>创建文件 <code>/etc/shadowsocks.json</code>，该文件包含Shadowsocks服务器的信息，文件内容为：  </p>
-<div class="highlight"><pre><span></span><span class="p">{</span>
-      <span class="nt">&quot;server&quot;</span><span class="p">:</span> <span class="s2">&quot;X.X.X.X&quot;</span><span class="p">,</span>
-      <span class="nt">&quot;server_port&quot;</span><span class="p">:</span> <span class="s2">&quot;9898&quot;</span><span class="p">,</span>
-      <span class="nt">&quot;password&quot;</span><span class="p">:</span> <span class="s2">&quot;password&quot;</span><span class="p">,</span>
-      <span class="nt">&quot;local_port&quot;</span><span class="p">:</span> <span class="s2">&quot;1080&quot;</span><span class="p">,</span>
-      <span class="nt">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;rc4-md5&quot;</span>
-<span class="p">}</span>
+<div class="highlight"><pre><span></span>~~~json
+{
+      &quot;server&quot;: &quot;X.X.X.X&quot;,
+      &quot;server_port&quot;: &quot;9898&quot;,
+      &quot;password&quot;: &quot;password&quot;,
+      &quot;local_port&quot;: &quot;1080&quot;,
+      &quot;method&quot;: &quot;rc4-md5&quot;
+}
+~~~
 </pre></div>
 
 
